@@ -1,0 +1,7 @@
+tensorflow
+opencv-python
+numpy
+rasterio
+shapely
+scikit-image
+matplotlib

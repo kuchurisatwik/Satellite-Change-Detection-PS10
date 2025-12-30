@@ -235,100 +235,7 @@ This project is intended for educational and research purposes.
 
 ---
 
-🙌 Acknowledgements
-
-LEVIR-CD dataset creators
-
-U-Net architecture authors
-
-Open-source deep learning community
-High-Level Workflow
-
-1. Input satellite image pairs (Before & After)
-
-
-2. Preprocess images and extract patches
-
-
-3. Perform inference using a trained U-Net model
-
-
-4. Apply post-processing to clean predictions
-
-
-5. Generate final change detection masks
-
-
-
-
----
-
-📂 Repository Structure
-
-satellite-change-detection-ps10/
-│
-├── data/
-│   └── LEVIR-CD/                  # Dataset directory (before, after, labels)
-│
-├── models/
-│   └── unet_model.py              # U-Net model architecture
-│
-├── preprocessing/
-│   └── patch_extraction.py        # Patch generation (256x256 sliding window)
-│
-├── inference/
-│   ├── detect_changes.py          # Main inference pipeline
-│   └── post_processing.py         # Morphological filtering & cleanup
-│
-├── notebooks/
-│   └── experiments.ipynb          # Experiments and visual analysis
-│
-├── output/
-│   └── predicted_masks/           # Generated change detection outputs
-│
-├── requirements.txt               # Python dependencies
-├── README.md                      # Project documentation
-└── .gitignore
-
-
----
-
-📊 Dataset
-
-Dataset: LEVIR-CD
-
-Type: High-resolution satellite imagery
-
-Task: Binary change detection
-
-Labels: Change / No-change masks
-
-
-⚠️ Dataset files are not included in this repository due to size constraints.
-
-After downloading the dataset, place it inside:
-
-data/LEVIR-CD/
-
-
----
-
-🏗️ Model Architecture
-
-Model Used: U-Net
-
-
-Why U-Net?
-
-Designed for pixel-level segmentation
-
-Skip connections preserve spatial details
-
-Widely used in satellite and medical imaging tasks
-
-
-Input: Before and After images (stacked or paired)
-Output: Binary segmentation mask highlighting changed regions
+🙌  mask highlighting changed regions
 
 
 ---
@@ -495,5 +402,6 @@ CI/CD pipeline integration
 📜 License
 
 This project is intended for educational and research purposes.
+
 
 

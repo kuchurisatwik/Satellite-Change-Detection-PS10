@@ -1,234 +1,216 @@
 # 🛰️ Satellite Change Detection using Deep Learning (PS10)
 
-This repository implements a **Satellite Image Change Detection system** using deep learning to automatically identify changes between satellite images captured at different times.
+A clean, modular implementation for pixel-level change detection between pairs of high‑resolution satellite images. The project demonstrates a U-Net–based semantic segmentation pipeline to generate binary change masks highlighting changed regions between a "before" and "after" image.
 
-The project follows a **clean, modular, and practical structure**, making it suitable for:
-
-- Learning change detection concepts  
-- Academic reference  
-- Portfolio and resume projects  
-- Real-world remote sensing workflows  
+This repository is intended for learning, research, and portfolio use.
 
 ---
 
-## 📌 Problem Statement
+## Table of contents
 
-Satellite imagery is widely used to monitor:
-
-- Urban expansion  
-- Infrastructure development  
-- Environmental changes  
-- Disaster impacts (floods, earthquakes, deforestation)  
-
-Manually comparing satellite images is **slow, expensive, and error-prone**.
-
-This project automates the process using a **deep learning–based semantic segmentation approach** to detect changes at the **pixel level**.
-
----
-
-## 🧠 Solution Overview
-
-The solution uses a **U-Net convolutional neural network** to generate **binary change maps** between two satellite images captured at different times.
-
-### High-Level Workflow
-
-1. Input satellite image pairs (Before & After)  
-2. Preprocess images and extract patches  
-3. Perform inference using a trained U-Net model  
-4. Apply post-processing to clean predictions  
-5. Generate final change detection masks  
+- [Overview](#overview)
+- [Highlights](#highlights)
+- [Repository structure](#repository-structure)
+- [Dataset](#dataset)
+- [Model & Approach](#model--approach)
+- [Preprocessing](#preprocessing)
+- [Inference pipeline](#inference-pipeline)
+- [Post-processing](#post-processing)
+- [Outputs](#outputs)
+- [Quickstart](#quickstart)
+- [Experiments & Notebooks](#experiments--notebooks)
+- [Future work](#future-work)
+- [License & Contact](#license--contact)
 
 ---
 
-## 📂 Repository Structure
+## Overview
+
+Change detection from satellite imagery is used for monitoring urban growth, infrastructure changes, environmental impacts, and disaster assessment. This project automates change detection via a deep learning semantic segmentation approach to produce binary maps that indicate where change has occurred at the pixel level.
+
+---
+
+## Highlights
+
+- U-Net based segmentation for pixel-accurate change detection
+- Patch-based preprocessing to support high-resolution images
+- End-to-end inference pipeline (patch extraction → prediction → reconstruction → cleanup)
+- Post-processing to reduce noise and false positives
+- Modular code structure suitable for experimentation and extension
+
+---
+
+## Repository structure
 
 satellite-change-detection-ps10/
 │
 ├── data/
-│   └── LEVIR-CD/                  # Dataset directory (before, after, labels)
+│   └── LEVIR-CD/                  # Dataset directory (before, after, labels) — not included
 │
 ├── models/
 │   └── unet_model.py              # U-Net model architecture
 │
 ├── preprocessing/
-│   └── patch_extraction.py        # Patch generation (256x256 sliding window)
+│   └── patch_extraction.py        # Patch generation and utilities
 │
 ├── inference/
-│   ├── detect_changes.py          # Main inference pipeline
-│   └── post_processing.py         # Morphological filtering & cleanup
+│   ├── detect_changes.py          # Main inference pipeline (load model, run prediction)
+│   └── post_processing.py         # Morphological filtering & cleanup utilities
 │
 ├── notebooks/
-│   └── experiments.ipynb          # Experiments and visual analysis
+│   └── experiments.ipynb          # Experiments, visualization, and analysis
 │
 ├── output/
 │   └── predicted_masks/           # Generated change detection outputs
 │
 ├── requirements.txt               # Python dependencies
-├── README.md                      # Project documentation
+├── README.md                      # This file
 └── .gitignore
+
 ---
 
-## 📊 Dataset
+## Dataset
 
-- **Dataset:** LEVIR-CD  
-- **Type:** High-resolution satellite imagery  
-- **Task:** Binary change detection  
-- **Labels:** Change / No-change masks  
+- Dataset used: LEVIR-CD (high-resolution building change detection dataset)
+- Task: Binary change detection (change / no-change)
+- Note: Dataset files are not included due to size. After downloading, place them at:
 
-⚠️ Dataset files are **not included** in this repository due to size constraints.
-
-After downloading the dataset, place it inside:
-
+```
 data/LEVIR-CD/
+```
+
+Expect the folder to contain paired "before" and "after" images and ground-truth change masks (for evaluation/training).
 
 ---
 
-## 🏗️ Model Architecture
+## Model & Approach
 
-- **Model Used:** U-Net  
+- Base architecture: U-Net (encoder-decoder segmentation network with skip-connections)
+- Input: A pair of images (Before, After). Common approaches:
+  - Stack channels (e.g., concatenate before and after images) as input to U-Net
+  - Use Siamese or difference-based input variants
+- Output: Binary mask where white (1) indicates detected change and black (0) indicates no change
 
-### Why U-Net?
-
-- Designed for pixel-level segmentation  
-- Skip connections preserve spatial details  
-- Widely used in satellite and medical imaging tasks  
-
-**Input:** Before and After images (stacked or paired)  
-**Output:** Binary segmentation mask highlighting changed regions  
-
----
-
-## ⚙️ Preprocessing
-
-### Patch Extraction
-
-- Large satellite images are split into **256 × 256 patches**
-- Advantages:
-  - Efficient memory usage  
-  - Faster inference  
-  - Better model generalization  
-
-### Normalization
-
-- Pixel values are normalized to improve model stability and prediction quality  
+Why U-Net?
+- Effective for dense segmentation tasks
+- Preserves spatial detail via skip connections
 
 ---
 
-## 🔍 Inference Pipeline
+## Preprocessing
 
-1. Load the trained U-Net model  
-2. Process satellite image patches  
-3. Predict binary change masks  
-4. Reconstruct full-size output from patches  
-5. Apply post-processing filters  
+Key steps:
+- Patch extraction: Large images are split into 256 × 256 overlapping/non-overlapping patches to reduce memory footprint and improve batch processing.
+- Normalization: Per-channel normalization / scaling to improve model stability.
+- (Optional) Data augmentation: flips, rotations, color jitter for robustness.
 
----
-
-## 🧹 Post-Processing
-
-To improve prediction quality, the following steps are applied:
-
-- Morphological opening and closing  
-- Noise reduction  
-- Removal of small false-positive regions  
-
-This results in **cleaner and more realistic change detection maps**.
+See: preprocessing/patch_extraction.py
 
 ---
 
-## 📤 Output
+## Inference pipeline
 
-- Binary change detection masks  
-- **White pixels:** Change detected  
-- **Black pixels:** No change  
+Main steps performed by inference/detect_changes.py:
 
-Outputs can be:
+1. Load trained U-Net weights
+2. Extract patches from input before/after images
+3. Run model prediction on patches (batch inference)
+4. Reconstruct full-size prediction from patches (stitching/averaging overlaps)
+5. Apply post-processing to clean the mask
+6. Save final binary mask to output/predicted_masks/
 
-- Visualized directly  
-- Used for GIS-based analysis  
-- Extended to vector representations (e.g., shapefiles)  
+Usage (Quickstart below) shows how to run the inference script.
 
 ---
 
-## 🚀 How to Run
+## Post-processing
 
-### 1️⃣ Install Dependencies
+Common techniques applied after prediction to improve map quality:
+
+- Morphological opening and closing to remove small artifacts and fill holes
+- Small object removal (connected-component analysis) to filter out tiny false positives
+- Optional median/gaussian filtering for smoothing
+
+Refer to inference/post_processing.py for utilities and configurable parameters.
+
+---
+
+## Outputs
+
+- Binary PNG/TIFF masks saved under output/predicted_masks/
+  - White (255) = change
+  - Black (0) = no change
+- Outputs can be:
+  - Visualized directly
+  - Converted to vector formats (e.g., shapefiles) for GIS workflows
+  - Used for evaluation against ground truth (IoU, F1-score, precision/recall)
+
+---
+
+## Quickstart
+
+1. Create environment and install dependencies
 
 ```bash
+python -m venv venv
+source venv/bin/activate     # or `venv\Scripts\activate` on Windows
 pip install -r requirements.txt
+```
 
-2️⃣ Prepare Dataset
+2. Prepare the dataset
 
-Place the dataset in:
+Download the LEVIR-CD dataset (or your chosen dataset) and place it here:
 
+```
 data/LEVIR-CD/
+```
 
-3️⃣ Run Change Detection
+3. Run change detection (inference)
 
-python inference/detect_changes.py
+```bash
+python inference/detect_changes.py --model-path path/to/model.pth \
+    --input-before data/LEVIR-CD/before/some_image.png \
+    --input-after data/LEVIR-CD/after/some_image.png \
+    --output-dir output/predicted_masks/
+```
 
-4️⃣ View Results
-
-Check the generated outputs inside:
-
-output/predicted_masks/
-
-
----
-
-🧪 Experiments
-
-Jupyter notebooks are included for:
-
-Model testing
-
-Visualization
-
-Experimental analysis
-
-
-Location:
-
-notebooks/
-
+Notes:
+- The CLI arguments in the example are illustrative; check `inference/detect_changes.py --help` for exact options.
+- If you want to train a model, add training scripts that load data patches and run optimization (not included here).
 
 ---
 
-🛠️ Technologies Used
+## Experiments & Notebooks
 
-Python
-
-PyTorch / TensorFlow (depending on implementation)
-
-NumPy
-
-OpenCV
-
-Scikit-image
-
-Jupyter Notebook
-
-
+- The `notebooks/experiments.ipynb` contains exploratory analysis, visualization of predictions, and evaluation routines.
+- Use the notebook to inspect intermediate results (patches, predictions, post-processing effects).
 
 ---
 
-📌 Future Improvements
+## Future improvements
 
-Model training scripts
+Potential extensions and research directions:
 
-Multi-class change detection
-
-GIS vector output (Shapefiles)
-
-Cloud deployment (AWS / GCP)
-
-CI/CD pipeline integration
-
-
+- Add training scripts with checkpointing and logging
+- Multi-class change detection (different change types)
+- Improve architecture (Siamese encoders, attention modules)
+- Convert outputs to vector formats (GeoJSON / Shapefiles)
+- Cloud deployment or an API for large-scale inference
+- Add unit tests and CI/CD pipeline
 
 ---
 
-📜 License
+## Contributing
 
-This project is intended for educational and research purposes.
+Contributions, issues, and feature requests are welcome. For major changes, please open an issue first to discuss the plan. Pull requests should include tests or reproduceable examples where applicable.
 
+---
+
+## License & Contact
+
+This repository is for educational and research purposes. Include your chosen license file (e.g., MIT, Apache-2.0) in the root if you want to make reuse terms explicit.
+
+Author: kuchurisatwik  
+Repository: https://github.com/kuchurisatwik/Satellite-Change-Detection-PS10
+
+If you have questions or suggestions, open an issue in the repo.

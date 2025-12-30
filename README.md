@@ -67,6 +67,8 @@ satellite-change-detection-ps10/
 ├── README.md                      # This file
 └── .gitignore
 
+
+
 ---
 
 ## Dataset
@@ -214,3 +216,4 @@ Author: kuchurisatwik
 Repository: https://github.com/kuchurisatwik/Satellite-Change-Detection-PS10
 
 If you have questions or suggestions, open an issue in the repo.
+
